@@ -2,6 +2,14 @@
 Thumbs.db
 ehthumbs.db
 
+Release/
+Debug/
+
+AutoSweeperTest/Release/
+AutoSweeperTest/Debug/
+
+.vs/
+
 # Folder config file
 Desktop.ini
 
