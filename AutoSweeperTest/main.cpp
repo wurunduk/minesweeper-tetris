@@ -28,13 +28,11 @@ etc??
 
 MemoryManager memoryManager;
 
-const DWORD m_dwFieldSizeXOfsset = 0x5334;		//there is maximum of 30 playable fields + 2 for sides
-const DWORD m_dwFieldSizeYOffset = 0x5338;		//maximum is 24 and + 2 fields too
+const DWORD m_dwFieldSizeOffset = 0x5334;		//there is maximum of 30 playable fields + 2 for sides
 
 const DWORD m_dwTime = 0x579C;		//currentTime
 
-const DWORD m_dwClickPositionX = 0x5118;		
-const DWORD m_dwClickPositionY = 0x511C;		
+const DWORD m_dwClickPositionOffset = 0x5118;
 
 const DWORD m_dwClick = 0x5140;		
 
@@ -326,13 +324,12 @@ DWORD WINAPI Run(LPVOID params)
 
 	const auto baseAddress = memoryManager.GetModuleBaseAddress("winmine.exe");
 
-	const auto fieldSizeX = memoryManager.Read<int>(baseAddress + m_dwFieldSizeXOfsset);
-	const auto fieldSizeY = memoryManager.Read<int>(baseAddress + m_dwFieldSizeYOffset);
-	std::cout << "field size x : y " << fieldSizeX << " : " << fieldSizeY << std::endl;
+	const auto fieldSize = memoryManager.Read<Vector2>(baseAddress + m_dwFieldSizeOffset);
+	std::cout << "field size " << fieldSize.x << " : " << fieldSize.y << std::endl;
 
 	currentField.currentObject.SetObject(5);
 
-	currentField.objectPosition.Set(fieldSizeX/2, 2);
+	currentField.objectPosition.Set(fieldSize.x/2, 2);
 
 	currentField.field = memoryManager.Read<Field>(baseAddress + m_dwFieldOffset);
 
@@ -341,9 +338,9 @@ DWORD WINAPI Run(LPVOID params)
 	SetActiveWindow(sweeperWindow);
 	SetWindowPos(sweeperWindow, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
-	for (auto y = 1; y <= fieldSizeY; y++)
+	for (auto y = 1; y <= fieldSize.y; y++)
 	{
-		for (auto x = 1; x <= fieldSizeX; x++)
+		for (auto x = 1; x <= fieldSize.x; x++)
 		{
 			currentField.SetSymbol(x, y, '@');
 		}
@@ -351,9 +348,9 @@ DWORD WINAPI Run(LPVOID params)
 
 	memoryManager.Write<Field>(baseAddress + m_dwFieldOffset, currentField.field);
 
-	for (auto y = 1; y <= fieldSizeY; y++)
+	for (auto y = 1; y <= fieldSize.y; y++)
 	{
-		for (auto x = 1; x <= fieldSizeX; x++)
+		for (auto x = 1; x <= fieldSize.x; x++)
 		{
 			if ((x - 2) % 3 == 0 && (y - 2) % 3 == 0)
 			{
@@ -393,9 +390,9 @@ DWORD WINAPI Run(LPVOID params)
 		POINT oldCursorPosition;
 		GetCursorPos(&oldCursorPosition);
 
-		for (auto y = 1; y <= fieldSizeY; y++)
+		for (auto y = 1; y <= fieldSize.y; y++)
 		{
-			for (auto x = 1; x <= fieldSizeX; x++)
+			for (auto x = 1; x <= fieldSize.x; x++)
 			{
 				if ((x - 2) % 3 == 0 && (y - 2) % 3 == 0)
 				{
@@ -403,13 +400,13 @@ DWORD WINAPI Run(LPVOID params)
 					Update();
 				}
 
-				if(fieldSizeX%3==1 && x == fieldSizeX)
+				if(fieldSize.x%3==1 && x == fieldSize.x)
 				{
 					SetCursorPos(windowRect.left + windowPixelOffset.x + x*checkerSize, windowRect.top + windowPixelOffset.y + y*checkerSize);
 					Update();
 				}
 
-				if(fieldSizeY%3==1 && y == fieldSizeY)
+				if(fieldSize.y%3==1 && y == fieldSize.y)
 				{
 					SetCursorPos(windowRect.left + windowPixelOffset.x + x*checkerSize, windowRect.top + windowPixelOffset.y + y*checkerSize);
 					Update();
@@ -447,21 +444,21 @@ DWORD WINAPI Run(LPVOID params)
 					}
 
 
-					for (auto y = 1; y <= fieldSizeY; y++)
+					for (auto y = 1; y <= fieldSize.y; y++)
 					{
-						for (auto x = 1; x <= fieldSizeX; x++)
+						for (auto x = 1; x <= fieldSize.x; x++)
 						{
 							if (*currentField.field[FieldInfo::TwoDimToLinear(x, y)] == '@')
 							{
 								break;
 							}
 
-							if(x == fieldSizeX)
+							if(x == fieldSize.x)
 							{
 								score += 1;
 								for(auto y2 = y; y2 > 0; y2--)
 								{
-									for(auto x3 = 1; x3 <= fieldSizeX; x3++)
+									for(auto x3 = 1; x3 <= fieldSize.x; x3++)
 									{
 										if(y2 == 1)
 											*currentField.field[FieldInfo::TwoDimToLinear(x3, y2)] = '@';
@@ -479,7 +476,7 @@ DWORD WINAPI Run(LPVOID params)
 						}
 					}
 
-					currentField.objectPosition.Set(fieldSizeX/2, 2);
+					currentField.objectPosition.Set(fieldSize.x/2, 2);
 					newObjectId += 1;
 					newObjectId %= 6;
 					currentField.currentObject.SetObject(newObjectId);
