@@ -246,7 +246,7 @@ struct FieldInfo
 	{
 		if(right != 1) right = -1;
 
-		const Vector2 newPos(objectPosition.x + 1*right, objectPosition.y);
+		const Vector2 newPos(objectPosition.x + right, objectPosition.y);
 		for(auto i = 0; i < 9; i++)
 		{
 			if(currentObject.objectField[i] != '@')
@@ -402,6 +402,19 @@ DWORD WINAPI Run(LPVOID params)
 					SetCursorPos(windowRect.left + windowPixelOffset.x + x*checkerSize, windowRect.top + windowPixelOffset.y + y*checkerSize);
 					Update();
 				}
+
+				if(fieldSizeX%3==1 && x == fieldSizeX)
+				{
+					SetCursorPos(windowRect.left + windowPixelOffset.x + x*checkerSize, windowRect.top + windowPixelOffset.y + y*checkerSize);
+					Update();
+				}
+
+				if(fieldSizeY%3==1 && y == fieldSizeY)
+				{
+					SetCursorPos(windowRect.left + windowPixelOffset.x + x*checkerSize, windowRect.top + windowPixelOffset.y + y*checkerSize);
+					Update();
+				}
+
 			}
 		}
 
@@ -484,7 +497,7 @@ DWORD WINAPI Run(LPVOID params)
 
 int main()
 {
-	std::cout << "INSERT to start, CTRL to stop , DELETE to exit\nPlease set field size to maximum allowed value (999 , 999, it will be resized)\n";
+	std::cout << "INSERT to start, CTRL to stop , DELETE to exit\n";
 	consoleWindow = GetConsoleWindow();
 	while (true)
 	{
@@ -514,7 +527,7 @@ int main()
 				Sleep(100);
 			}
 
-			if (GetAsyncKeyState(VK_UP) & 1)
+			if (GetAsyncKeyState(VK_UP) & 1 || GetAsyncKeyState(VK_SPACE) & 1)
 			{
 				currentField.currentObject.rotate();
 				Sleep(100);
@@ -522,7 +535,7 @@ int main()
 
 			fastMode = GetAsyncKeyState(VK_LSHIFT) || GetAsyncKeyState(VK_DOWN);
 
-			if(GetAsyncKeyState(VK_DELETE) & 1)
+			if(GetAsyncKeyState(VK_DELETE) & 1 || GetAsyncKeyState(VK_ESCAPE) & 1)
 			{
 				running = false;
 				break;
